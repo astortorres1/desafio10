@@ -1,0 +1,48 @@
+<!-- realTimeProducts.handlebars -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Products</title>
+</head>
+<body>
+    <h1>Lista de Productos en Tiempo Real</h1>
+    <form id="productForm">
+        <input type="text" id="productName" placeholder="Nombre del producto">
+        <button type="submit">Agregar Producto</button>
+    </form>
+    <ul id="productList">
+        <!-- La lista de productos se actualizará dinámicamente aquí -->
+    </ul>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        // Manejar el envío del formulario
+        document.getElementById('productForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const productName = document.getElementById('productName').value;
+            socket.emit('createProduct', { name: productName });
+            document.getElementById('productName').value = '';
+        });
+
+        // Manejar eventos de actualización de productos
+        socket.on('productCreated', (product) => {
+            const productList = document.getElementById('productList');
+            const listItem = document.createElement('li');
+            listItem.textContent = product.name;
+            productList.appendChild(listItem);
+        });
+
+        socket.on('productDeleted', (productId) => {
+            const productList = document.getElementById('productList');
+            const listItem = document.getElementById(productId);
+            if (listItem) {
+                productList.removeChild(listItem);
+            }
+        });
+    </script>
+</body>
+</html>
